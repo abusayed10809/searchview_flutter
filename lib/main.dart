@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_search_api_demo/ecommerce/item_bloc/item_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_search_api_demo/ecommerce/models/item_model.dart';
+
+import 'package:flutter/src/widgets/image.dart' as img;
+import 'package:flutter_search_api_demo/ecommerce/view/PersistentHeader.dart';
+import 'package:flutter_search_api_demo/ecommerce/view/SearchBar.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,7 +23,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: BlocProvider(
           create: (_) => ItemBloc(),
-          child: MyHomePage(title: 'bloc',)
+          child: MyHomePage(),
         ),
       ),
       // home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -26,51 +31,103 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void incrementCounter() {
-    _itemBloc.add(TextChanged(text: "rice"));
-  }
-
-  ItemBloc _itemBloc;
-
+class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
+      // resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomPadding: false,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text('Search Item'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+      body: CustomScrollView(
+        physics: NeverScrollableScrollPhysics(),
+        slivers: [
+          SliverPersistentHeader(
+            pinned: true,
+            floating: true,
+            delegate: PersistentHeader(
+              minHeight: height * 0.095,
+              maxHeight: height * 0.095,
+              child: Container(
+                  width: width,
+                  height: height * 0.05,
+                  alignment: Alignment.center,
+                  child: _initialPage()),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+          ),
+          SliverToBoxAdapter(
+            child: Container(
+              width: width,
+              height: height * 0.8,
+              color: Colors.red,
+              child: BlocBuilder<ItemBloc, ItemState>(
+                builder: (BuildContext context, ItemState itemState) {
+                  if (itemState is ItemInitialState) {
+                    return _indicatorPage();
+                  }
+                  if (itemState is ItemLoadingState) {
+                    return _loadingPage();
+                  } else if (itemState is ItemSuccessLoadState) {
+                    return _itemListView(itemState.items, width, height);
+                  } else if (itemState is ItemErrorLoadState) {
+                    return _errorPage(itemState.error);
+                  }
+                },
+              ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _initialPage() {
+    return SearchBar();
+  }
+
+  Widget _indicatorPage() {
+    return Center(
+      child: Text(
+        "Enter name of product",
+      ),
+    );
+  }
+
+  Widget _loadingPage() {
+    return Center(child: CircularProgressIndicator());
+  }
+
+  Widget _itemListView(List<ItemModel> itemList, double width, double height) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+      ),
+      itemBuilder: (context, index) {
+        ItemModel singleItem = itemList[index];
+        return Container(
+          width: 100,
+          height: 100,
+          child: img.Image.network(
+            singleItem.image,
+          ),
+        );
+      },
+      itemCount: itemList.length,
+    );
+  }
+
+  Widget _errorPage(int errorCode) {
+    return Center(
+      child: Text(
+        "Error $errorCode, can't fetch data",
+        style: TextStyle(
+          fontSize: 15,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          BlocProvider.of<ItemBloc>(context).add(TextChanged(text: 'rice'));
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

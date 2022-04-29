@@ -26,7 +26,12 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
         print("all good +++++ xxxxx");
         yield ItemLoadingState();
         final item = await APIClient().search(event.text);
-        yield ItemSuccessLoadState(item);
+        if(item is SuccessFetch){
+          yield ItemSuccessLoadState(item.itemModel);
+        }
+        else if(item is FailureFetch){
+          yield ItemErrorLoadState(item.errorCode);
+        }
       }
     }
   }

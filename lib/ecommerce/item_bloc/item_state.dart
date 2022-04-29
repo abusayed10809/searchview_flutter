@@ -24,8 +24,7 @@ class ItemSuccessLoadState extends ItemState{
 }
 
 class ItemErrorLoadState extends ItemState{
-  final String error;
-
+  final int error;
   const ItemErrorLoadState(this.error);
 
   @override
