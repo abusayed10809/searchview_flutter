@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_search_api_demo/constants/color.dart';
 import 'package:flutter_search_api_demo/ecommerce/item_bloc/item_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_search_api_demo/ecommerce/models/item_model.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_search_api_demo/ecommerce/models/item_model.dart';
 import 'package:flutter/src/widgets/image.dart' as img;
 import 'package:flutter_search_api_demo/ecommerce/view/PersistentHeader.dart';
 import 'package:flutter_search_api_demo/ecommerce/view/SearchBar.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,7 +23,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: colorCustom,
       ),
       home: Scaffold(
         body: BlocProvider(
@@ -44,13 +46,9 @@ class MyHomePage extends StatelessWidget {
   final ScrollController _scrollController = ScrollController();
 
   void setupScrollController(context) {
-    print("scroll controller xxxxxxxx +++++");
     _scrollController.addListener(() {
-      print("scroll listener xxxxxxxx +++++");
       if (_scrollController.position.atEdge) {
-        print("scroll position xxxxxxxx +++++");
         if (_scrollController.position.pixels != 0) {
-          print("scroll pixels xxxxxxxx +++++");
           BlocProvider.of<ItemBloc>(context).add(ScrolledToBottom(oldItemList: oldItemList, itemName: itemName));
         }
       }
@@ -68,7 +66,10 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Search Item'),
+        title: Text(
+          "Search Page",
+        ),
+        centerTitle: true,
       ),
       body: CustomScrollView(
         physics: NeverScrollableScrollPhysics(),
@@ -80,9 +81,8 @@ class MyHomePage extends StatelessWidget {
               minHeight: height * 0.095,
               maxHeight: height * 0.095,
               child: Container(
-                  width: width,
-                  height: height * 0.05,
                   alignment: Alignment.center,
+                  color: colorCustom,
                   child: _initialPage()),
             ),
           ),
@@ -90,6 +90,7 @@ class MyHomePage extends StatelessWidget {
             child: Container(
               width: width,
               height: height * 0.8,
+              color: colorCustom,
               child: BlocBuilder<ItemBloc, ItemState>(
                 builder: (BuildContext context, ItemState itemState) {
                   if (itemState is ItemInitialState) {
@@ -99,6 +100,7 @@ class MyHomePage extends StatelessWidget {
                     itemName = itemState.itemName;
                     return _loadingPage();
                   } else if (itemState is ItemSuccessLoadState) {
+                    isLoading = false;
                     oldItemList = itemState.items;
                     return _itemListView(itemState.items, width, height);
                   } else if (itemState is ItemErrorLoadState) {
@@ -126,23 +128,58 @@ class MyHomePage extends StatelessWidget {
   }
 
   Widget _loadingPage() {
-    return Center(child: CircularProgressIndicator());
+    return Center(child: CircularProgressIndicator(color: Colors.black,));
   }
 
   Widget _itemListView(List<ItemModel> itemList, double width, double height) {
     return GridView.builder(
+      shrinkWrap: true,
       controller: _scrollController,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
+        childAspectRatio: (width)/(height*0.9),
+        mainAxisSpacing: width*0.025,
+        crossAxisSpacing: width*0.025
       ),
       itemBuilder: (context, index) {
         if(index < itemList.length){
           ItemModel singleItem = itemList[index];
           return Container(
-            width: 100,
-            height: 100,
-            child: img.Image.network(
-              singleItem.image,
+            color: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: width*0.03, vertical: height*0.03),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                img.Image.network(
+                  singleItem.image,
+                ),
+                SizedBox(
+                  height: height*0.01,
+                ),
+                Text(
+                  singleItem.productName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+                SizedBox(
+                  height: height*0.01,
+                ),
+                Text(
+                  "৳ ${singleItem.charge.currentCharge.toString()}"
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "৳ ${singleItem.charge.sellingPrice.toString()}",
+                    ),
+                    Text(
+                      "৳ ${singleItem.charge.profit.toString()}",
+                    ),
+                  ],
+                ),
+              ],
             ),
           );
         }else{
@@ -165,6 +202,7 @@ class MyHomePage extends StatelessWidget {
         "Error $errorCode, can't fetch data",
         style: TextStyle(
           fontSize: 15,
+          fontFamily: 'Hind Siliguri Regular'
         ),
       ),
     );
