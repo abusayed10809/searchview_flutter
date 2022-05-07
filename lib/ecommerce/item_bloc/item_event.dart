@@ -8,7 +8,7 @@ class TextChanged extends ItemEvent{
   final String text;
 
   const TextChanged({
-    @required this.text
+    @required this.text,
   });
 
   @override
@@ -16,4 +16,14 @@ class TextChanged extends ItemEvent{
 
   @override
   String toString() => 'Text Changed {text: $text}';
+}
+
+class ScrolledToBottom extends ItemEvent{
+  final List<ItemModel> oldItemList;
+  final String itemName;
+
+  const ScrolledToBottom({@required this.itemName, @required this.oldItemList});
+
+  @override
+  List<Object> get props => [oldItemList];
 }

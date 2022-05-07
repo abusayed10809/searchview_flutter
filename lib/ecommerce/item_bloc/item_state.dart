@@ -9,7 +9,13 @@ abstract class ItemState extends Equatable {
 
 class ItemInitialState extends ItemState{}
 
-class ItemLoadingState extends ItemState{}
+class ItemLoadingState extends ItemState{
+  final String itemName;
+
+  ItemLoadingState(this.itemName);
+  @override
+  List<Object> get props => [itemName];
+}
 
 class ItemSuccessLoadState extends ItemState{
   final List<ItemModel> items;

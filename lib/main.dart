@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_search_api_demo/ecommerce/item_bloc/item_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -32,14 +35,38 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
+
+  String itemName;
+  List<ItemModel> oldItemList = [];
+
+  bool isLoading = false;
+
+  final ScrollController _scrollController = ScrollController();
+
+  void setupScrollController(context) {
+    print("scroll controller xxxxxxxx +++++");
+    _scrollController.addListener(() {
+      print("scroll listener xxxxxxxx +++++");
+      if (_scrollController.position.atEdge) {
+        print("scroll position xxxxxxxx +++++");
+        if (_scrollController.position.pixels != 0) {
+          print("scroll pixels xxxxxxxx +++++");
+          BlocProvider.of<ItemBloc>(context).add(ScrolledToBottom(oldItemList: oldItemList, itemName: itemName));
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    setupScrollController(context);
+
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('Search Item'),
       ),
@@ -63,15 +90,16 @@ class MyHomePage extends StatelessWidget {
             child: Container(
               width: width,
               height: height * 0.8,
-              color: Colors.red,
               child: BlocBuilder<ItemBloc, ItemState>(
                 builder: (BuildContext context, ItemState itemState) {
                   if (itemState is ItemInitialState) {
                     return _indicatorPage();
                   }
                   if (itemState is ItemLoadingState) {
+                    itemName = itemState.itemName;
                     return _loadingPage();
                   } else if (itemState is ItemSuccessLoadState) {
+                    oldItemList = itemState.items;
                     return _itemListView(itemState.items, width, height);
                   } else if (itemState is ItemErrorLoadState) {
                     return _errorPage(itemState.error);
@@ -92,7 +120,7 @@ class MyHomePage extends StatelessWidget {
   Widget _indicatorPage() {
     return Center(
       child: Text(
-        "Enter name of product",
+        "Enter product name, press done",
       ),
     );
   }
@@ -103,20 +131,31 @@ class MyHomePage extends StatelessWidget {
 
   Widget _itemListView(List<ItemModel> itemList, double width, double height) {
     return GridView.builder(
+      controller: _scrollController,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
       ),
       itemBuilder: (context, index) {
-        ItemModel singleItem = itemList[index];
-        return Container(
-          width: 100,
-          height: 100,
-          child: img.Image.network(
-            singleItem.image,
-          ),
-        );
+        if(index < itemList.length){
+          ItemModel singleItem = itemList[index];
+          return Container(
+            width: 100,
+            height: 100,
+            child: img.Image.network(
+              singleItem.image,
+            ),
+          );
+        }else{
+          Timer(Duration(milliseconds: 30),(){
+            _scrollController.jumpTo(
+                _scrollController.position.maxScrollExtent
+            );
+          });
+          return _loadingPage();
+        }
+
       },
-      itemCount: itemList.length,
+      itemCount: itemList.length + (isLoading? 1 : 0),
     );
   }
 

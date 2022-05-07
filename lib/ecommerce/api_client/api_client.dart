@@ -8,11 +8,12 @@ import 'package:http/http.dart' as http;
 
 class APIClient{
 
-  final String baseUrl = "https://panel.supplyline.network/api/product/search-suggestions/?limit=10&search=";
+  final String baseUrl = "https://panel.supplyline.network/api/product/search-suggestions/?limit=10&offset=";
+  final String searchUrl = "&search=";
   final http.Client httpClient = http.Client();
 
-  Future<dynamic> search(String term) async {
-    final response = await httpClient.get(Uri.parse(baseUrl+term));
+  Future<dynamic> search(int offset, String term) async {
+    final response = await httpClient.get(Uri.parse(baseUrl+searchUrl+term));
     final results = json.decode(response.body);
 
     print(results["data"]["products"]["results"]);
@@ -22,7 +23,6 @@ class APIClient{
           .map((dynamic item) =>
           ItemModel.fromJson(item as Map<String, dynamic>))
           .toList();
-
       return SuccessFetch(items);
     } else {
        return FailureFetch(response.statusCode);
