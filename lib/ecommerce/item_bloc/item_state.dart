@@ -9,12 +9,18 @@ abstract class ItemState extends Equatable {
 
 class ItemInitialState extends ItemState{}
 
-class ItemLoadingState extends ItemState{}
+class ItemLoadingState extends ItemState{
+  final String itemName;
+
+  ItemLoadingState({@required this.itemName});
+  @override
+  List<Object> get props => [itemName];
+}
 
 class ItemSuccessLoadState extends ItemState{
   final List<ItemModel> items;
 
-  const ItemSuccessLoadState(this.items);
+  const ItemSuccessLoadState({@required this.items});
 
   @override
   List<Object> get props => [items];
@@ -24,10 +30,18 @@ class ItemSuccessLoadState extends ItemState{
 }
 
 class ItemErrorLoadState extends ItemState{
-  final String error;
-
-  const ItemErrorLoadState(this.error);
+  final int error;
+  const ItemErrorLoadState({@required this.error});
 
   @override
   List<Object> get props => [error];
+}
+
+class ItemDetailState extends ItemState{
+  final ItemModel singleItem;
+
+  ItemDetailState({@required this.singleItem});
+
+  @override
+  List<Object> get props => [singleItem];
 }
