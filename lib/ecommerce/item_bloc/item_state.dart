@@ -12,7 +12,7 @@ class ItemInitialState extends ItemState{}
 class ItemLoadingState extends ItemState{
   final String itemName;
 
-  ItemLoadingState(this.itemName);
+  ItemLoadingState({@required this.itemName});
   @override
   List<Object> get props => [itemName];
 }
@@ -20,7 +20,7 @@ class ItemLoadingState extends ItemState{
 class ItemSuccessLoadState extends ItemState{
   final List<ItemModel> items;
 
-  const ItemSuccessLoadState(this.items);
+  const ItemSuccessLoadState({@required this.items});
 
   @override
   List<Object> get props => [items];
@@ -31,8 +31,17 @@ class ItemSuccessLoadState extends ItemState{
 
 class ItemErrorLoadState extends ItemState{
   final int error;
-  const ItemErrorLoadState(this.error);
+  const ItemErrorLoadState({@required this.error});
 
   @override
   List<Object> get props => [error];
+}
+
+class ItemDetailState extends ItemState{
+  final ItemModel singleItem;
+
+  ItemDetailState({@required this.singleItem});
+
+  @override
+  List<Object> get props => [singleItem];
 }

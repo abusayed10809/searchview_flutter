@@ -24,10 +24,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_bloc:
-  equatable:
-  http:
-  stream_transform:
+  flutter_bloc: ^8.0.1
+  equatable: ^2.0.3
+  http: ^0.13.4
+  stream_transform: ^2.0.0
   google_fonts: ^2.3.2
 
 

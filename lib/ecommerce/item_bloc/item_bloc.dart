@@ -20,27 +20,32 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
           emit(ItemInitialState());
         }
         else if(searchText.isNotEmpty){
-          emit(ItemLoadingState(searchText));
+          emit(ItemLoadingState(itemName: searchText));
           final item = await APIClient().search(0, event.text);
           if(item is SuccessFetch){
-            emit(ItemSuccessLoadState(item.itemModel));
+            emit(ItemSuccessLoadState(items: item.itemModel));
           }
           else if(item is FailureFetch){
-            emit(ItemErrorLoadState(item.errorCode));
+            emit(ItemErrorLoadState(error: item.errorCode));
           }
         }
       }
       if(event is ScrolledToBottom){
         List<ItemModel> oldItemList = event.oldItemList;
         String itemName = event.itemName;
+        print("item name: $itemName");
         final item = await APIClient().search(oldItemList.length, itemName);
         if(item is SuccessFetch){
           List<ItemModel> newList = oldItemList + item.itemModel;
-          emit(ItemSuccessLoadState(newList));
+          emit(ItemSuccessLoadState(items: newList));
         }
         else if(item is FailureFetch){
-          emit(ItemErrorLoadState(item.errorCode));
+          emit(ItemErrorLoadState(error: item.errorCode));
         }
+      }
+      if(event is ItemNextPageEvent){
+        ItemModel singleItem = event.singleItem;
+        emit(ItemDetailState(singleItem: singleItem));
       }
     });
   }

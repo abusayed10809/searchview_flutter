@@ -13,7 +13,7 @@ class APIClient{
   final http.Client httpClient = http.Client();
 
   Future<dynamic> search(int offset, String term) async {
-    final response = await httpClient.get(Uri.parse(baseUrl+searchUrl+term));
+    final response = await httpClient.get(Uri.parse(baseUrl+offset.toString()+searchUrl+term));
     final results = json.decode(utf8.decode(response.bodyBytes));
 
     print(results["data"]["products"]["results"]);

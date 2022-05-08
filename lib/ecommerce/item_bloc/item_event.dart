@@ -4,11 +4,11 @@ abstract class ItemEvent extends Equatable {
   const ItemEvent();
 }
 
-class TextChanged extends ItemEvent{
+class TextChanged extends ItemEvent {
   final String text;
 
   const TextChanged({
-    @required this.text,
+    this.text,
   });
 
   @override
@@ -18,7 +18,7 @@ class TextChanged extends ItemEvent{
   String toString() => 'Text Changed {text: $text}';
 }
 
-class ScrolledToBottom extends ItemEvent{
+class ScrolledToBottom extends ItemEvent {
   final List<ItemModel> oldItemList;
   final String itemName;
 
@@ -26,4 +26,13 @@ class ScrolledToBottom extends ItemEvent{
 
   @override
   List<Object> get props => [oldItemList];
+}
+
+class ItemNextPageEvent extends ItemEvent {
+  final ItemModel singleItem;
+
+  const ItemNextPageEvent({@required this.singleItem});
+
+  @override
+  List<Object> get props => [singleItem];
 }
